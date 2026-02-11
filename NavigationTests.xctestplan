@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "B498A047-2418-4F17-82C5-8DAEA0665071",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Navigation.xcodeproj",
+        "identifier" : "559C69132F3C963800A9099E",
+        "name" : "NavigationTests"
+      }
+    }
+  ],
+  "version" : 1
+}
