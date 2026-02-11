@@ -1,0 +1,10 @@
+*.pbxproj merge=union
+*.xcworkspace -text
+*.xcuserstate -text
+
+*.swift text eol=lf
+*.h text eol=lf
+*.m text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.sh text eol=lf
