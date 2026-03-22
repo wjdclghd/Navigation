@@ -8,3 +8,12 @@
 *.c text eol=lf
 *.cpp text eol=lf
 *.sh text eol=lf
+*.rb text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.plist text eol=lf
+*.xcscheme text eol=lf
+*.xctestplan text eol=lf
+Gemfile text eol=lf
+Gemfile.lock text eol=lf
+Package.swift text eol=lf

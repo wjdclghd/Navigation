@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2610"
+   LastUpgradeVersion = "2630"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "55CEAD722F3C8C2A00E3614C"
-               BuildableName = "Navigation.framework"
-               BlueprintName = "Navigation"
-               ReferencedContainer = "container:Navigation.xcodeproj">
+               BlueprintIdentifier = "55F20AF32F6EA3B000829E0B"
+               BuildableName = "NavigationCI.app"
+               BlueprintName = "NavigationCI"
+               ReferencedContainer = "container:NavigationCI.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -27,8 +27,13 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      shouldAutocreateTestPlan = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <TestPlans>
+         <TestPlanReference
+            reference = "container:NavigationCI.xctestplan"
+            default = "YES">
+         </TestPlanReference>
+      </TestPlans>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -40,6 +45,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "55F20AF32F6EA3B000829E0B"
+            BuildableName = "NavigationCI.app"
+            BlueprintName = "NavigationCI"
+            ReferencedContainer = "container:NavigationCI.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -47,15 +62,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "55CEAD722F3C8C2A00E3614C"
-            BuildableName = "Navigation.framework"
-            BlueprintName = "Navigation"
-            ReferencedContainer = "container:Navigation.xcodeproj">
+            BlueprintIdentifier = "55F20AF32F6EA3B000829E0B"
+            BuildableName = "NavigationCI.app"
+            BlueprintName = "NavigationCI"
+            ReferencedContainer = "container:NavigationCI.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

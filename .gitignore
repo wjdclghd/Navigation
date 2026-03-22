@@ -5,6 +5,7 @@
 ### macOS ###
 # General
 .DS_Store
+__MACOSX/
 .AppleDouble
 .LSOverride
 
@@ -41,7 +42,7 @@ Temporary Items
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
 ## User settings
-xcuserdata/
+**/xcuserdata/
 
 ## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
 *.xcscmblueprint
@@ -98,7 +99,10 @@ Dependencies/
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
-fastlane/test_output
+fastlane/test_output/
+fastlane/DerivedData/
+fastlane/logs/
+*.xcresult
 
 
 # Code Injection
@@ -141,5 +145,10 @@ vendor/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
+**/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+
+# Legacy root project should not be tracked
+Navigation.xcodeproj/
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,xcode,macos,cocoapods
