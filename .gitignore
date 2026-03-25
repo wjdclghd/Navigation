@@ -131,6 +131,11 @@ vendor/
 .idea/
 
 
+# Planning docs
+**/plan.md
+**/research.md
+
+
 ### Xcode ###
 
 ## Xcode 8 and earlier
