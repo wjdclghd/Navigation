@@ -11,16 +11,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		55E45F632F6EADE5008C880D /* NavigationCI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = NavigationCI.xctestplan; sourceTree = "<group>"; };
+		55E45F632F6EADE5008C880D /* NavigationCI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = NavigationCI.xctestplan; sourceTree = "<group>"; };
 		55F20AF42F6EA3B000829E0B /* NavigationCI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NavigationCI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		55F20B012F6EA3B100829E0B /* NavigationCITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NavigationCITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		55F20B042F6EA3B100829E0B /* NavigationCITests */ = {
+		553A6BAB2F7407AB00C1A1FA /* NavigationTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NavigationCITests;
-			sourceTree = "<group>";
+			name = NavigationTests;
+			path = ../Tests/NavigationTests;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -46,8 +47,8 @@
 		55F20AEB2F6EA3B000829E0B = {
 			isa = PBXGroup;
 			children = (
+				553A6BAB2F7407AB00C1A1FA /* NavigationTests */,
 				55E45F632F6EADE5008C880D /* NavigationCI.xctestplan */,
-				55F20B042F6EA3B100829E0B /* NavigationCITests */,
 				55F20AF52F6EA3B000829E0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -96,7 +97,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				55F20B042F6EA3B100829E0B /* NavigationCITests */,
+				553A6BAB2F7407AB00C1A1FA /* NavigationTests */,
 			);
 			name = NavigationCITests;
 			packageProductDependencies = (

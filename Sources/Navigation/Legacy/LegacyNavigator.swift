@@ -8,7 +8,7 @@
 import Foundation
 
 /// iOS 15 대응을 위한 Navigator 구현체.
-/// - Note: iOS15의 SwiftUI NavigationView 제약 때문에, 실제 스택 관리는 Application Host(View)에서 하고
+/// - Note: iOS 15의 SwiftUI NavigationView 제약 때문에, 실제 스택 관리는 호스트에서 수행하고
 ///         여기서는 "명령"을 closure로 위임합니다.
 ///
 /// Example:
@@ -22,6 +22,7 @@ import Foundation
 /// )
 /// let navigator = Navigator(legacy) // Feature에는 Navigator만 주입
 /// ```
+@MainActor
 public final class LegacyNavigator<Route: Hashable>: NavigatorProtocol {
 
     private let pushHandler: (Route) -> Void

@@ -1,80 +1,64 @@
 # Navigation
 
-Navigation 모듈은 CleanArchitectureiOSApp에서 사용되는 공통 네비게이션
-기능을 제공하는 모듈입니다.
+Navigation 모듈은 SwiftUI 기반 화면 전환을 추상화하는 공통 모듈입니다. iOS 15와 iOS 16+ 환경을 모두 지원하며, Feature 계층은 구현 방식(Stack/Legacy)을 알 필요 없이 동일한 인터페이스로 네비게이션 명령을 호출할 수 있습니다.
 
-SwiftUI 기반 화면 전환을 추상화하며, iOS 15 및 iOS 16+ 환경을 모두
-지원합니다.
-
-Navigation 모듈은 화면 전환의 "구현 방식"만 담당하며, Route 정의 및 View
-생성은 Application 레이어에서 담당합니다.
-
-------------------------------------------------------------------------
+---
 
 ## Goals
+- iOS 15 및 iOS 16+ 동시 지원
+- NavigationStack(iOS 16+) 및 Legacy NavigationView(iOS 15) 대응
+- Feature와 Navigation 구현 분리
+- DI 기반 Navigator 주입 지원
+- 장기 유지보수성 확보
 
--   iOS 15 및 iOS 16+ 지원
--   SwiftUI NavigationStack 및 Legacy NavigationView 대응
--   Clean Architecture 기반 Navigation 추상화
--   Feature와 Navigation 구현 분리
--   DI 기반 Navigator 주입 지원
--   장기 유지보수성 확보
-
-------------------------------------------------------------------------
+---
 
 ## Architecture Role
+Navigation 모듈이 담당하는 범위는 “화면 전환의 구현 방식”입니다.
 
-Navigation 모듈의 역할:
+### 포함
+- push / pop / popToRoot / present / dismiss 추상화
+- iOS 버전별 Navigation 구현 분리
+- Feature가 구현을 몰라도 되도록 인터페이스 제공
 
--   push / pop / present / dismiss 추상화
--   iOS 버전별 Navigation 구현 분리
--   Feature가 Navigation 구현을 몰라도 되도록 인터페이스 제공
+### 제외
+- AppRoute 정의
+- View 생성 로직
+- DIContainer
+- Feature 의존성
 
-Navigation 모듈에 포함되지 않는 항목:
-
--   AppRoute 정의
--   View 생성 로직
--   DIContainer
--   Feature 의존성
-
-위 항목들은 Application 레이어에서 관리됩니다.
-
-------------------------------------------------------------------------
-
-## Module Structure
-
-    Navigation
-    ├── Sources
-    │   ├── Public
-    │   │   ├── NavigatorProtocol.swift
-    │   │   └── AnyNavigator.swift
-    │   │
-    │   ├── Stack
-    │   │   └── StackNavigator.swift
-    │   │
-    │   └── Legacy
-    │       └── LegacyNavigator.swift
-    │
-    └── Tests
-
-------------------------------------------------------------------------
+---
 
 ## Supported Platforms
+- iOS 15.0+
+- SwiftUI
 
--   iOS 15.0+
--   SwiftUI
--   Combine compatible
+---
 
-------------------------------------------------------------------------
+## Module Structure
+```
+Navigation
+├── Sources
+│   ├── Public
+│   │   ├── NavigatorProtocol.swift
+│   │   └── Navigator.swift
+│   ├── Stack
+│   │   └── StackNavigator.swift
+│   └── Legacy
+│       └── LegacyNavigator.swift
+└── Tests
+```
+
+---
 
 ## Core Concepts
 
-## NavigatorProtocol
+### NavigatorProtocol
+Feature는 `NavigatorProtocol`만 의존합니다.
 
-Feature는 NavigatorProtocol만 의존합니다.
-
-``` swift
-public protocol NavigatorProtocol {
+```swift
+@MainActor
+public protocol NavigatorProtocol: AnyObject {
     associatedtype Route: Hashable
 
     func push(_ route: Route)
@@ -86,107 +70,75 @@ public protocol NavigatorProtocol {
 }
 ```
 
-------------------------------------------------------------------------
+### Navigator (타입 소거 래퍼)
+Feature에 구현체를 숨기기 위한 타입 소거 래퍼입니다.
 
-## StackNavigator (iOS 16+)
-
-SwiftUI NavigationStack 기반 Navigator입니다.
-
--   Route 기반 push/pop 관리
--   ObservableObject 기반 상태 관리
-
-------------------------------------------------------------------------
-
-## LegacyNavigator (iOS 15)
-
-SwiftUI NavigationView 또는 UIKit bridge 기반 Navigator입니다.
-
--   iOS 15 대응
--   Closure 기반 Navigation 처리
-
-------------------------------------------------------------------------
-
-## AnyNavigator
-
-Feature에서 Navigator 구현체를 숨기기 위한 type-erasure wrapper입니다.
-
-Feature 모듈은 Navigation 구현(StackNavigator, LegacyNavigator 등)을
-직접 알 필요 없이 AnyNavigator만 사용합니다.
-
-``` swift
-let navigator: AnyNavigator<AppRoute>
-navigator.push(.searchDetail)
+```swift
+@MainActor
+public final class Navigator<Route: Hashable>: NavigatorProtocol {
+    public init<N: NavigatorProtocol>(_ navigator: N) where N.Route == Route
+}
 ```
 
-------------------------------------------------------------------------
+### StackNavigator (iOS 16+)
+`NavigationStack`과 바인딩되는 상태 보유형 구현입니다.
+
+- `path`: push/pop 스택 상태
+- `presented`: 모달 표시 상태
+
+### LegacyNavigator (iOS 15)
+iOS 15의 `NavigationView` 제약을 고려해, 실제 스택 관리는 호스트에서 수행하고 모듈은 명령만 위임합니다.
+
+---
 
 ## Usage
-
-Navigation 모듈은 Application 레이어에서 생성되고 Feature 레이어로
-주입됩니다.
-
 ### Application Layer
-
 iOS 16+
-
-``` swift
-@StateObject var navigator = StackNavigator<AppRoute>()
+```swift
+@StateObject var stack = StackNavigator<AppRoute>()
+let navigator = Navigator(stack)
 ```
 
 iOS 15
-
-``` swift
-let navigator = LegacyNavigator<AppRoute>(...)
-```
-
-Feature로 전달:
-
-``` swift
-let anyNavigator = AnyNavigator(navigator)
+```swift
+let legacy = LegacyNavigator<AppRoute>(
+    push: { _ in },
+    pop: { },
+    popToRoot: { },
+    present: { _ in },
+    dismiss: { }
+)
+let navigator = Navigator(legacy)
 ```
 
 ### Feature Layer
-
-``` swift
-navigator.push(.searchDetail(trackId: id))
+```swift
+navigator.push(.detail(id: id))
 ```
 
-Feature는 Navigation 구현을 알 필요가 없습니다.
+---
 
-------------------------------------------------------------------------
+## Threading Rule
+모든 네비게이션 명령은 Main thread에서 수행해야 합니다. (API는 `@MainActor`로 제한)
+
+---
 
 ## Dependency Direction
+```
+Feature → Navigation
+Application → Navigation
+Navigation → (no dependency on Feature or Application)
+```
 
-Navigation 모듈의 의존성 방향은 다음과 같습니다:
+---
 
-    Feature → Navigation
-    Application → Navigation
+## Testing
+테스트는 Xcode 프로젝트 기반으로 실행되며, CI에서는 Fastlane `scan`을 통해 구동됩니다.
 
-    Navigation → (no dependency on Feature or Application)
-
-Navigation 모듈은 Feature 및 Application에 의존하지 않습니다.
-
-------------------------------------------------------------------------
-
-## Design Principles
-
-Navigation 모듈은 다음 설계 원칙을 따릅니다:
-
--   Clean Architecture
--   Dependency Inversion Principle
--   Single Responsibility Principle
--   Feature Isolation
--   Version-independent Navigation abstraction
-
-------------------------------------------------------------------------
+---
 
 ## Tuist Integration
-
-Navigation 모듈은 Tuist Framework Target으로 구성됩니다.
-
-Example:
-
-``` swift
+```swift
 .target(
     name: "Navigation",
     product: .framework,
@@ -194,22 +146,16 @@ Example:
 )
 ```
 
-Application 타겟에서 dependency로 추가하여 사용합니다.
-
-------------------------------------------------------------------------
+---
 
 ## Future Improvements
+- DeepLink Routing Support
+- Navigation middleware
+- Transition animation abstraction
+- Modal coordination
+- Navigation state restoration
 
-향후 확장 예정 항목:
+---
 
--   DeepLink Routing Support
--   Navigation middleware
--   Transition animation abstraction
--   Modal coordination
--   Navigation state restoration
-
-------------------------------------------------------------------------
-
-## License
-
-Internal module for CleanArchitectureiOSApp.
+Created by: JEONG, Chi-hong
+Initial version: June 2026

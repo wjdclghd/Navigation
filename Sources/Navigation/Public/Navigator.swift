@@ -7,8 +7,10 @@
 
 import Foundation
 
+@MainActor
 public final class Navigator<Route: Hashable>: NavigatorProtocol {
 
+    // 타입 소거를 통해 구현체의 세부사항을 숨깁니다.
     private let _push: (Route) -> Void
     private let _pop: () -> Void
     private let _popToRoot: () -> Void
