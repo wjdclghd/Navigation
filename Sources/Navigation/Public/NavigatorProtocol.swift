@@ -6,7 +6,7 @@
 //
 
 @MainActor
-public protocol NavigatorProtocol: AnyObject {
+public protocol NavigatorProtocol: AnyObject, Sendable {
     associatedtype Route: Hashable
 
     func push(_ route: Route)

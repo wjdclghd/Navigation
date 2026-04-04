@@ -9,7 +9,7 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 @MainActor
-public final class StackNavigator<Route: Hashable>: ObservableObject, NavigatorProtocol {
+public final class StackNavigator<Route: Hashable>: ObservableObject, NavigatorProtocol, @unchecked Sendable {
 
     @Published public private(set) var path:             [Route]                  = []
     @Published public private(set) var presentationItem: PresentationItem<Route>? = nil
