@@ -10,38 +10,37 @@ import Foundation
 @MainActor
 public final class Navigator<Route: Hashable>: NavigatorProtocol {
 
-    // 타입 소거를 통해 구현체의 세부사항을 숨깁니다.
-    private let _push: (Route) -> Void
-    private let _pop: () -> Void
+    private let _push:      (Route) -> Void
+    private let _pop:       () -> Void
     private let _popToRoot: () -> Void
-    private let _present: (Route) -> Void
-    private let _dismiss: () -> Void
+    private let _present:   (Route) -> Void
+    private let _dismiss:   () -> Void
 
     public init<N: NavigatorProtocol>(_ navigator: N) where N.Route == Route {
-        self._push = navigator.push
-        self._pop = navigator.pop
-        self._popToRoot = navigator.popToRoot
-        self._present = navigator.present
-        self._dismiss = navigator.dismiss
+        self._push      = { [weak navigator] route in navigator?.push(route) }
+        self._pop       = { [weak navigator] in navigator?.pop() }
+        self._popToRoot = { [weak navigator] in navigator?.popToRoot() }
+        self._present   = { [weak navigator] route in navigator?.present(route) }
+        self._dismiss   = { [weak navigator] in navigator?.dismiss() }
     }
 
     public init(
-        push: @escaping (Route) -> Void,
-        pop: @escaping () -> Void,
+        push:      @escaping (Route) -> Void,
+        pop:       @escaping () -> Void,
         popToRoot: @escaping () -> Void,
-        present: @escaping (Route) -> Void,
-        dismiss: @escaping () -> Void
+        present:   @escaping (Route) -> Void,
+        dismiss:   @escaping () -> Void
     ) {
-        self._push = push
-        self._pop = pop
+        self._push      = push
+        self._pop       = pop
         self._popToRoot = popToRoot
-        self._present = present
-        self._dismiss = dismiss
+        self._present   = present
+        self._dismiss   = dismiss
     }
 
-    public func push(_ route: Route) { _push(route) }
-    public func pop() { _pop() }
-    public func popToRoot() { _popToRoot() }
+    public func push(_ route: Route)    { _push(route) }
+    public func pop()                   { _pop() }
+    public func popToRoot()             { _popToRoot() }
     public func present(_ route: Route) { _present(route) }
-    public func dismiss() { _dismiss() }
+    public func dismiss()               { _dismiss() }
 }
