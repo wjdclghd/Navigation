@@ -70,6 +70,30 @@ final class NavigatorTests: XCTestCase {
         XCTAssertEqual(spy.popToRootCount, 1)
     }
 
+    // MARK: - replace
+
+    func test_replace_forwardsRoutes() {
+        sut.replace(with: [.home, .settings])
+
+        XCTAssertEqual(spy.replaceCount, 1)
+        XCTAssertEqual(spy.lastReplacedRoutes, [.home, .settings])
+    }
+
+    func test_replace_withEmptyArray_forwardsEmptyRoutes() {
+        sut.replace(with: [])
+
+        XCTAssertEqual(spy.lastReplacedRoutes, [])
+    }
+
+    // MARK: - pop(to:)
+
+    func test_popTo_forwardsTargetRoute() {
+        sut.pop(to: .settings)
+
+        XCTAssertEqual(spy.popToCount, 1)
+        XCTAssertEqual(spy.lastPopToRoute, .settings)
+    }
+
     // MARK: - present / dismiss
 
     func test_present_forwardsRouteAndStyle() {
@@ -103,6 +127,8 @@ final class NavigatorTests: XCTestCase {
         localSut.push(.home)
         localSut.pop()
         localSut.popToRoot()
+        localSut.replace(with: [.home])
+        localSut.pop(to: .home)
         localSut.present(.settings, style: .sheet)
         localSut.dismiss()
 
@@ -119,7 +145,7 @@ final class NavigatorTests: XCTestCase {
         releasableSpy = nil
 
         releasableNavigator.push(.settings)
-        releasableNavigator.pop()
+        releasableNavigator.replace(with: [.home])
 
         sut.push(.home)
         XCTAssertEqual(spy.pushCount, 1)
@@ -136,13 +162,17 @@ private final class NavigatorSpy: NavigatorProtocol {
     private(set) var pushCount:      Int = 0
     private(set) var popCount:       Int = 0
     private(set) var popToRootCount: Int = 0
+    private(set) var replaceCount:   Int = 0
+    private(set) var popToCount:     Int = 0
     private(set) var presentCount:   Int = 0
     private(set) var dismissCount:   Int = 0
 
-    private(set) var pushedRoutes:        [TestRoute] = []
-    var lastPushedRoute:      TestRoute?      { pushedRoutes.last }
-    private(set) var lastPresentedRoute:  TestRoute?
-    private(set) var lastPresentedStyle:  PresentationStyle?
+    private(set) var pushedRoutes:       [TestRoute] = []
+    var lastPushedRoute:     TestRoute?      { pushedRoutes.last }
+    private(set) var lastReplacedRoutes: [TestRoute]?
+    private(set) var lastPopToRoute:     TestRoute?
+    private(set) var lastPresentedRoute: TestRoute?
+    private(set) var lastPresentedStyle: PresentationStyle?
 
     func push(_ route: TestRoute) {
         pushCount += 1
@@ -152,6 +182,16 @@ private final class NavigatorSpy: NavigatorProtocol {
     func pop()       { popCount += 1 }
     func popToRoot() { popToRootCount += 1 }
     func dismiss()   { dismissCount += 1 }
+
+    func replace(with routes: [TestRoute]) {
+        replaceCount += 1
+        lastReplacedRoutes = routes
+    }
+
+    func pop(to route: TestRoute) {
+        popToCount += 1
+        lastPopToRoute = route
+    }
 
     func present(_ route: TestRoute, style: PresentationStyle) {
         presentCount += 1

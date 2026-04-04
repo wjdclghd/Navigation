@@ -29,6 +29,15 @@ public final class StackNavigator<Route: Hashable>: ObservableObject, NavigatorP
         path.removeAll()
     }
 
+    public func replace(with routes: [Route]) {
+        path = routes
+    }
+
+    public func pop(to route: Route) {
+        guard let index = path.lastIndex(of: route) else { return }
+        path = Array(path.prefix(through: index))
+    }
+
     public func present(_ route: Route, style: PresentationStyle = .sheet) {
         presentationItem = PresentationItem(route: route, style: style)
     }

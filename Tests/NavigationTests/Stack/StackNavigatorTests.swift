@@ -75,6 +75,57 @@ final class StackNavigatorTests: XCTestCase {
         XCTAssertTrue(sut.path.isEmpty)
     }
 
+    // MARK: - replace
+
+    func test_replace_overwritesEntirePath() {
+        sut.push(.home)
+        sut.push(.settings)
+
+        sut.replace(with: [.settings, .home, .detail(id: "1")])
+
+        XCTAssertEqual(sut.path, [.settings, .home, .detail(id: "1")])
+    }
+
+    func test_replace_withEmptyArray_clearsPath() {
+        sut.push(.home)
+        sut.push(.settings)
+
+        sut.replace(with: [])
+
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    // MARK: - pop(to:)
+
+    func test_popTo_removesRoutesAfterTarget() {
+        sut.push(.home)
+        sut.push(.detail(id: "1"))
+        sut.push(.settings)
+
+        sut.pop(to: .detail(id: "1"))
+
+        XCTAssertEqual(sut.path, [.home, .detail(id: "1")])
+    }
+
+    func test_popTo_usesLastOccurrenceWhenRouteDuplicated() {
+        sut.push(.home)
+        sut.push(.detail(id: "1"))
+        sut.push(.home)
+
+        sut.pop(to: .detail(id: "1"))
+
+        XCTAssertEqual(sut.path, [.home, .detail(id: "1")])
+    }
+
+    func test_popTo_missingRoute_doesNotModifyPath() {
+        sut.push(.home)
+        sut.push(.detail(id: "1"))
+
+        sut.pop(to: .settings)
+
+        XCTAssertEqual(sut.path, [.home, .detail(id: "1")])
+    }
+
     // MARK: - present / dismiss
 
     func test_present_sheet_setsRouteAndStyle() {
