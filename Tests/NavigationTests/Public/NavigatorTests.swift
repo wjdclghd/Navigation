@@ -72,11 +72,18 @@ final class NavigatorTests: XCTestCase {
 
     // MARK: - present / dismiss
 
-    func test_present_forwardsCommandAndRouteValue() {
-        sut.present(.settings)
+    func test_present_forwardsRouteAndStyle() {
+        sut.present(.settings, style: .fullScreenCover)
 
         XCTAssertEqual(spy.presentCount, 1)
         XCTAssertEqual(spy.lastPresentedRoute, .settings)
+        XCTAssertEqual(spy.lastPresentedStyle, .fullScreenCover)
+    }
+
+    func test_present_defaultStyle_forwardsSheetStyle() {
+        sut.present(.home, style: .sheet)
+
+        XCTAssertEqual(spy.lastPresentedStyle, .sheet)
     }
 
     func test_dismiss_forwardsCommandToImplementation() {
@@ -96,7 +103,7 @@ final class NavigatorTests: XCTestCase {
         localSut.push(.home)
         localSut.pop()
         localSut.popToRoot()
-        localSut.present(.settings)
+        localSut.present(.settings, style: .sheet)
         localSut.dismiss()
 
         XCTAssertTrue(true)
@@ -132,9 +139,10 @@ private final class NavigatorSpy: NavigatorProtocol {
     private(set) var presentCount:   Int = 0
     private(set) var dismissCount:   Int = 0
 
-    private(set) var pushedRoutes:     [TestRoute] = []
-    var lastPushedRoute:   TestRoute? { pushedRoutes.last }
-    private(set) var lastPresentedRoute: TestRoute?
+    private(set) var pushedRoutes:        [TestRoute] = []
+    var lastPushedRoute:      TestRoute?      { pushedRoutes.last }
+    private(set) var lastPresentedRoute:  TestRoute?
+    private(set) var lastPresentedStyle:  PresentationStyle?
 
     func push(_ route: TestRoute) {
         pushCount += 1
@@ -145,8 +153,9 @@ private final class NavigatorSpy: NavigatorProtocol {
     func popToRoot() { popToRootCount += 1 }
     func dismiss()   { dismissCount += 1 }
 
-    func present(_ route: TestRoute) {
+    func present(_ route: TestRoute, style: PresentationStyle) {
         presentCount += 1
         lastPresentedRoute = route
+        lastPresentedStyle = style
     }
 }

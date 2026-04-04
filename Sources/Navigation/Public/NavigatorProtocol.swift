@@ -13,6 +13,6 @@ public protocol NavigatorProtocol: AnyObject {
     func pop()
     func popToRoot()
 
-    func present(_ route: Route)
+    func present(_ route: Route, style: PresentationStyle)
     func dismiss()
 }
