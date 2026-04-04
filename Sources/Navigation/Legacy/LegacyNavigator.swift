@@ -7,7 +7,7 @@
 
 @available(iOS, deprecated: 16.0, renamed: "StackNavigator")
 @MainActor
-public final class LegacyNavigator<Route: Hashable>: NavigatorProtocol {
+public final class LegacyNavigator<Route: Hashable>: NavigatorProtocol, @unchecked Sendable {
 
     private let pushHandler:      (Route) -> Void
     private let popHandler:       () -> Void

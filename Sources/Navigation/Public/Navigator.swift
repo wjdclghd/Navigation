@@ -6,7 +6,7 @@
 //
 
 @MainActor
-public final class Navigator<Route: Hashable>: NavigatorProtocol {
+public final class Navigator<Route: Hashable>: NavigatorProtocol, @unchecked Sendable {
 
     private let _push:      (Route) -> Void
     private let _pop:       () -> Void
