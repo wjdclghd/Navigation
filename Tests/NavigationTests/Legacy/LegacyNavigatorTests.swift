@@ -25,7 +25,7 @@ final class LegacyNavigatorTests: XCTestCase {
             push:      { receivedRoute = $0 },
             pop:       {},
             popToRoot: {},
-            present:   { _ in },
+            present:   { _, _ in },
             dismiss:   {}
         )
 
@@ -40,7 +40,7 @@ final class LegacyNavigatorTests: XCTestCase {
             push:      { _ in },
             pop:       { popCount += 1 },
             popToRoot: {},
-            present:   { _ in },
+            present:   { _, _ in },
             dismiss:   {}
         )
 
@@ -55,7 +55,7 @@ final class LegacyNavigatorTests: XCTestCase {
             push:      { _ in },
             pop:       {},
             popToRoot: { popToRootCount += 1 },
-            present:   { _ in },
+            present:   { _, _ in },
             dismiss:   {}
         )
 
@@ -64,19 +64,21 @@ final class LegacyNavigatorTests: XCTestCase {
         XCTAssertEqual(popToRootCount, 1)
     }
 
-    func test_present_invokesHandlerWithRoute() {
+    func test_present_invokesHandlerWithRouteAndStyle() {
         var receivedRoute: TestRoute?
+        var receivedStyle: PresentationStyle?
         let sut = LegacyNavigator<TestRoute>(
             push:      { _ in },
             pop:       {},
             popToRoot: {},
-            present:   { receivedRoute = $0 },
+            present:   { route, style in receivedRoute = route; receivedStyle = style },
             dismiss:   {}
         )
 
-        sut.present(.settings)
+        sut.present(.settings, style: .fullScreenCover)
 
         XCTAssertEqual(receivedRoute, .settings)
+        XCTAssertEqual(receivedStyle, .fullScreenCover)
     }
 
     func test_dismiss_invokesHandler() {
@@ -85,7 +87,7 @@ final class LegacyNavigatorTests: XCTestCase {
             push:      { _ in },
             pop:       {},
             popToRoot: {},
-            present:   { _ in },
+            present:   { _, _ in },
             dismiss:   { dismissCount += 1 }
         )
 
@@ -97,22 +99,22 @@ final class LegacyNavigatorTests: XCTestCase {
     // MARK: - 전체 명령 순서
 
     func test_allCommands_invokeCorrectHandlersInOrder() {
-        var pushCount     = 0
-        var popCount      = 0
+        var pushCount      = 0
+        var popCount       = 0
         var popToRootCount = 0
-        var presentCount  = 0
-        var dismissCount  = 0
+        var presentCount   = 0
+        var dismissCount   = 0
 
         let sut = LegacyNavigator<TestRoute>(
             push:      { _ in pushCount += 1 },
             pop:       { popCount += 1 },
             popToRoot: { popToRootCount += 1 },
-            present:   { _ in presentCount += 1 },
+            present:   { _, _ in presentCount += 1 },
             dismiss:   { dismissCount += 1 }
         )
 
         sut.push(.home)
-        sut.present(.settings)
+        sut.present(.settings, style: .sheet)
         sut.pop()
         sut.popToRoot()
         sut.dismiss()

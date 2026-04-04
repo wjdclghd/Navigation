@@ -12,14 +12,14 @@ public final class LegacyNavigator<Route: Hashable>: NavigatorProtocol {
     private let pushHandler:      (Route) -> Void
     private let popHandler:       () -> Void
     private let popToRootHandler: () -> Void
-    private let presentHandler:   (Route) -> Void
+    private let presentHandler:   (Route, PresentationStyle) -> Void
     private let dismissHandler:   () -> Void
 
     public init(
         push:      @escaping (Route) -> Void,
         pop:       @escaping () -> Void,
         popToRoot: @escaping () -> Void,
-        present:   @escaping (Route) -> Void,
+        present:   @escaping (Route, PresentationStyle) -> Void,
         dismiss:   @escaping () -> Void
     ) {
         self.pushHandler      = push
@@ -29,9 +29,9 @@ public final class LegacyNavigator<Route: Hashable>: NavigatorProtocol {
         self.dismissHandler   = dismiss
     }
 
-    public func push(_ route: Route)    { pushHandler(route) }
-    public func pop()                   { popHandler() }
-    public func popToRoot()             { popToRootHandler() }
-    public func present(_ route: Route) { presentHandler(route) }
-    public func dismiss()               { dismissHandler() }
+    public func push(_ route: Route)                          { pushHandler(route) }
+    public func pop()                                         { popHandler() }
+    public func popToRoot()                                   { popToRootHandler() }
+    public func present(_ route: Route, style: PresentationStyle) { presentHandler(route, style) }
+    public func dismiss()                                     { dismissHandler() }
 }

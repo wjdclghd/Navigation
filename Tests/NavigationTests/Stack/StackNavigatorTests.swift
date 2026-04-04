@@ -77,24 +77,42 @@ final class StackNavigatorTests: XCTestCase {
 
     // MARK: - present / dismiss
 
-    func test_present_setsRoute() {
-        sut.present(.settings)
+    func test_present_sheet_setsRouteAndStyle() {
+        sut.present(.settings, style: .sheet)
 
-        XCTAssertEqual(sut.presented, .settings)
+        XCTAssertEqual(sut.presentationItem?.route, .settings)
+        XCTAssertEqual(sut.presentationItem?.style, .sheet)
+    }
+
+    func test_present_fullScreenCover_setsRouteAndStyle() {
+        sut.present(.home, style: .fullScreenCover)
+
+        XCTAssertEqual(sut.presentationItem?.route, .home)
+        XCTAssertEqual(sut.presentationItem?.style, .fullScreenCover)
+    }
+
+    func test_present_sheetWithDetents_setsRouteAndStyle() {
+        let detents: Set<NavigationDetent> = [.medium, .large]
+
+        sut.present(.detail(id: "1"), style: .sheetWithDetents(detents))
+
+        XCTAssertEqual(sut.presentationItem?.route, .detail(id: "1"))
+        XCTAssertEqual(sut.presentationItem?.style, .sheetWithDetents(detents))
     }
 
     func test_present_consecutiveCalls_replacesFirst() {
-        sut.present(.home)
-        sut.present(.settings)
+        sut.present(.home, style: .sheet)
+        sut.present(.settings, style: .fullScreenCover)
 
-        XCTAssertEqual(sut.presented, .settings)
+        XCTAssertEqual(sut.presentationItem?.route, .settings)
+        XCTAssertEqual(sut.presentationItem?.style, .fullScreenCover)
     }
 
-    func test_dismiss_clearsPresented() {
-        sut.present(.settings)
+    func test_dismiss_clearsPresentationItem() {
+        sut.present(.settings, style: .sheet)
 
         sut.dismiss()
 
-        XCTAssertNil(sut.presented)
+        XCTAssertNil(sut.presentationItem)
     }
 }

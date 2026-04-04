@@ -11,8 +11,8 @@ import SwiftUI
 @MainActor
 public final class StackNavigator<Route: Hashable>: ObservableObject, NavigatorProtocol {
 
-    @Published public private(set) var path: [Route] = []
-    @Published public private(set) var presented: Route?
+    @Published public private(set) var path:             [Route]                  = []
+    @Published public private(set) var presentationItem: PresentationItem<Route>? = nil
 
     public init() {}
 
@@ -29,11 +29,23 @@ public final class StackNavigator<Route: Hashable>: ObservableObject, NavigatorP
         path.removeAll()
     }
 
-    public func present(_ route: Route) {
-        presented = route
+    public func present(_ route: Route, style: PresentationStyle = .sheet) {
+        presentationItem = PresentationItem(route: route, style: style)
     }
 
     public func dismiss() {
-        presented = nil
+        presentationItem = nil
+    }
+}
+
+@available(iOS 16.0, *)
+extension NavigationDetent {
+    var swiftUIDetent: PresentationDetent {
+        switch self {
+        case .medium:              return .medium
+        case .large:               return .large
+        case .fraction(let value): return .fraction(value)
+        case .height(let value):   return .height(value)
+        }
     }
 }
