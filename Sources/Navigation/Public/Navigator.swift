@@ -5,8 +5,6 @@
 //  Created by jch on 2/11/26.
 //
 
-import Foundation
-
 @MainActor
 public final class Navigator<Route: Hashable>: NavigatorProtocol {
 
@@ -24,7 +22,7 @@ public final class Navigator<Route: Hashable>: NavigatorProtocol {
         self._dismiss   = { [weak navigator] in navigator?.dismiss() }
     }
 
-    public init(
+    internal init(
         push:      @escaping (Route) -> Void,
         pop:       @escaping () -> Void,
         popToRoot: @escaping () -> Void,

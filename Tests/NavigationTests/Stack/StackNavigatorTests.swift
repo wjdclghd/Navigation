@@ -1,42 +1,100 @@
 //
 //  StackNavigatorTests.swift
-//  Navigation
+//  NavigationTests
 //
 //  Created by jch on 2/11/26.
 //
 
-import Foundation
-import Testing
+import XCTest
 @testable import Navigation
 
 private enum TestRoute: Hashable {
-    case a
-    case b
+    case home
+    case detail(id: String)
+    case settings
 }
 
+@available(iOS 16.0, *)
 @MainActor
-final class StackNavigatorTests {
-    @Test
-    @available(iOS 16.0, *)
-    func stackNavigator_updatesPathAndPresented() {
-        let navigator = StackNavigator<TestRoute>()
+final class StackNavigatorTests: XCTestCase {
 
-        navigator.push(.a)
-        #expect(navigator.path == [.a])
+    private var sut: StackNavigator<TestRoute>!
 
-        navigator.push(.b)
-        #expect(navigator.path == [.a, .b])
+    override func setUp() {
+        super.setUp()
+        sut = StackNavigator()
+    }
 
-        navigator.pop()
-        #expect(navigator.path == [.a])
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
+    }
 
-        navigator.popToRoot()
-        #expect(navigator.path.isEmpty)
+    // MARK: - push
 
-        navigator.present(.b)
-        #expect(navigator.presented == .b)
+    func test_push_appendsRouteToPath() {
+        sut.push(.home)
 
-        navigator.dismiss()
-        #expect(navigator.presented == nil)
+        XCTAssertEqual(sut.path, [.home])
+    }
+
+    func test_push_multipleCalls_appendsInOrder() {
+        sut.push(.home)
+        sut.push(.detail(id: "1"))
+        sut.push(.settings)
+
+        XCTAssertEqual(sut.path, [.home, .detail(id: "1"), .settings])
+    }
+
+    // MARK: - pop
+
+    func test_pop_removesLastRoute() {
+        sut.push(.home)
+        sut.push(.settings)
+
+        sut.pop()
+
+        XCTAssertEqual(sut.path, [.home])
+    }
+
+    func test_pop_onEmptyStack_doesNotCrash() {
+        sut.pop()
+
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    // MARK: - popToRoot
+
+    func test_popToRoot_clearsEntirePath() {
+        sut.push(.home)
+        sut.push(.detail(id: "1"))
+        sut.push(.settings)
+
+        sut.popToRoot()
+
+        XCTAssertTrue(sut.path.isEmpty)
+    }
+
+    // MARK: - present / dismiss
+
+    func test_present_setsRoute() {
+        sut.present(.settings)
+
+        XCTAssertEqual(sut.presented, .settings)
+    }
+
+    func test_present_consecutiveCalls_replacesFirst() {
+        sut.present(.home)
+        sut.present(.settings)
+
+        XCTAssertEqual(sut.presented, .settings)
+    }
+
+    func test_dismiss_clearsPresented() {
+        sut.present(.settings)
+
+        sut.dismiss()
+
+        XCTAssertNil(sut.presented)
     }
 }
