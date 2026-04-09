@@ -1,5 +1,5 @@
 //
-//  NavigationMiddleware.swift
+//  NavigationEventObserver.swift
 //  Navigation
 //
 //  Created by jch on 2/11/26.
@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 public protocol NavigationEventObserver: AnyObject, Sendable {
     func didPush(route: AnyHashable)
     func didPop()
