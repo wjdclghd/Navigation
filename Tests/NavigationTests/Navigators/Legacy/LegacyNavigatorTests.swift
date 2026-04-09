@@ -14,12 +14,37 @@ private enum TestRoute: Hashable {
     case settings
 }
 
+/*
+ LegacyNavigator<Route>의 클로저 위임 동작을 검증하는 테스트입니다.
+
+ 이 테스트는 LegacyNavigator가 각 화면 이동 명령을 주입된 클로저로 올바르게
+ 전달하는지, 모든 명령이 독립적으로 해당 핸들러를 호출하는지를 확인합니다.
+ setUp/tearDown이 없으며 각 테스트에서 makeSUT 헬퍼를 통해 독립적인 인스턴스를 생성합니다.
+ */
 @available(iOS, deprecated: 16.0)
 @MainActor
 final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - 헬퍼
 
+    /*
+     테스트용 LegacyNavigator 인스턴스를 생성하는 헬퍼입니다.
+
+     기본값으로 아무 동작도 하지 않는 클로저를 사용하므로,
+     검증이 필요한 클로저만 개별 테스트에서 선택적으로 전달합니다.
+
+     Parameters:
+     - push:      push 명령을 수신할 클로저 (기본값: 빈 클로저)
+     - pop:       pop 명령을 수신할 클로저 (기본값: 빈 클로저)
+     - popToRoot: popToRoot 명령을 수신할 클로저 (기본값: 빈 클로저)
+     - replace:   replace 명령을 수신할 클로저 (기본값: 빈 클로저)
+     - popTo:     popTo 명령을 수신할 클로저 (기본값: 빈 클로저)
+     - present:   present 명령을 수신할 클로저 (기본값: 빈 클로저)
+     - dismiss:   dismiss 명령을 수신할 클로저 (기본값: 빈 클로저)
+
+     Returns:
+     - 테스트 목적으로 구성된 LegacyNavigator<TestRoute> 인스턴스
+     */
     private func makeSUT(
         push: @escaping (TestRoute) -> Void = { _ in },
         pop: @escaping () -> Void = {},
@@ -42,6 +67,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - push
 
+    /*
+     push 호출 시 주입된 핸들러가 Route와 함께 호출되는지 검증합니다.
+     */
     func test_push_invokesHandler() {
         var receivedRoute: TestRoute?
         let sut = makeSUT(push: { receivedRoute = $0 })
@@ -53,6 +81,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - pop
 
+    /*
+     pop 호출 시 주입된 핸들러가 호출되는지 검증합니다.
+     */
     func test_pop_invokesHandler() {
         var popCount = 0
         let sut = makeSUT(pop: { popCount += 1 })
@@ -64,6 +95,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - popToRoot
 
+    /*
+     popToRoot 호출 시 주입된 핸들러가 호출되는지 검증합니다.
+     */
     func test_popToRoot_invokesHandler() {
         var popToRootCount = 0
         let sut = makeSUT(popToRoot: { popToRootCount += 1 })
@@ -75,6 +109,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - replace
 
+    /*
+     replace 호출 시 주입된 핸들러가 Route 배열과 함께 호출되는지 검증합니다.
+     */
     func test_replace_invokesHandlerWithRoutes() {
         var receivedRoutes: [TestRoute]?
         let sut = makeSUT(replace: { receivedRoutes = $0 })
@@ -86,6 +123,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - pop(to:)
 
+    /*
+     pop(to:) 호출 시 주입된 핸들러가 대상 Route와 함께 호출되는지 검증합니다.
+     */
     func test_popTo_invokesHandlerWithRoute() {
         var receivedRoute: TestRoute?
         let sut = makeSUT(popTo: { receivedRoute = $0 })
@@ -97,6 +137,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - present
 
+    /*
+     present 호출 시 주입된 핸들러가 Route와 스타일과 함께 호출되는지 검증합니다.
+     */
     func test_present_invokesHandlerWithRouteAndStyle() {
         var receivedRoute: TestRoute?
         var receivedStyle: PresentationStyle?
@@ -113,6 +156,9 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - dismiss
 
+    /*
+     dismiss 호출 시 주입된 핸들러가 호출되는지 검증합니다.
+     */
     func test_dismiss_invokesHandler() {
         var dismissCount = 0
         let sut = makeSUT(dismiss: { dismissCount += 1 })
@@ -124,6 +170,11 @@ final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - 전체 명령 순서
 
+    /*
+     모든 화면 이동 명령을 순서대로 호출했을 때 각 핸들러가 정확히 한 번씩 호출되는지 검증합니다.
+
+     여러 핸들러를 동시에 주입한 환경에서 서로 간섭 없이 독립적으로 동작해야 합니다.
+     */
     func test_allCommands_invokeCorrectHandlersInOrder() {
         var pushCount      = 0
         var popCount       = 0

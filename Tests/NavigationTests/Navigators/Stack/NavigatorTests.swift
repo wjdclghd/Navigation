@@ -14,26 +14,34 @@ private enum TestRoute: Hashable {
     case settings
 }
 
+/*
+ Navigator<Route>의 타입 소거 동작과 메모리 안전성을 검증하는 테스트입니다.
+
+ 이 테스트는 NavigatorSpy를 통해 Navigator가 각 화면 이동 명령을 올바르게
+ 구현체에 전달하는지, 연관값이 포함된 Route가 정확히 전달되는지, 그리고
+ 구현체 해제 후에도 크래시 없이 동작하는지를 확인합니다.
+ */
 @MainActor
 final class NavigatorTests: XCTestCase {
 
     private var spy: NavigatorSpy!
     private var sut: Navigator<TestRoute>!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
         spy = NavigatorSpy()
         sut = Navigator(spy)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         sut = nil
         spy = nil
-        super.tearDown()
     }
 
     // MARK: - push
 
+    /*
+     push 호출 시 구현체에 명령과 Route 값이 전달되는지 검증합니다.
+     */
     func test_push_forwardsCommandAndRouteValue() {
         sut.push(.home)
 
@@ -41,12 +49,18 @@ final class NavigatorTests: XCTestCase {
         XCTAssertEqual(spy.lastPushedRoute, .home)
     }
 
+    /*
+     연관값이 포함된 Route가 정확히 구현체에 전달되는지 검증합니다.
+     */
     func test_push_forwardsAssociatedValueRouteAccurately() {
         sut.push(.detail(id: "item-42"))
 
         XCTAssertEqual(spy.lastPushedRoute, .detail(id: "item-42"))
     }
 
+    /*
+     여러 번 push 시 호출 순서와 Route 목록이 구현체에 유지되는지 검증합니다.
+     */
     func test_push_multipleCalls_forwardsAllRoutesInOrder() {
         sut.push(.home)
         sut.push(.detail(id: "1"))
@@ -58,12 +72,18 @@ final class NavigatorTests: XCTestCase {
 
     // MARK: - pop / popToRoot
 
+    /*
+     pop 호출이 구현체에 전달되는지 검증합니다.
+     */
     func test_pop_forwardsCommandToImplementation() {
         sut.pop()
 
         XCTAssertEqual(spy.popCount, 1)
     }
 
+    /*
+     popToRoot 호출이 구현체에 전달되는지 검증합니다.
+     */
     func test_popToRoot_forwardsCommandToImplementation() {
         sut.popToRoot()
 
@@ -72,6 +92,9 @@ final class NavigatorTests: XCTestCase {
 
     // MARK: - replace
 
+    /*
+     replace 호출 시 Route 배열이 구현체에 전달되는지 검증합니다.
+     */
     func test_replace_forwardsRoutes() {
         sut.replace(with: [.home, .settings])
 
@@ -79,6 +102,9 @@ final class NavigatorTests: XCTestCase {
         XCTAssertEqual(spy.lastReplacedRoutes, [.home, .settings])
     }
 
+    /*
+     빈 배열로 replace 호출 시 빈 배열이 그대로 구현체에 전달되는지 검증합니다.
+     */
     func test_replace_withEmptyArray_forwardsEmptyRoutes() {
         sut.replace(with: [])
 
@@ -87,6 +113,9 @@ final class NavigatorTests: XCTestCase {
 
     // MARK: - pop(to:)
 
+    /*
+     pop(to:) 호출 시 대상 Route가 구현체에 전달되는지 검증합니다.
+     */
     func test_popTo_forwardsTargetRoute() {
         sut.pop(to: .settings)
 
@@ -96,6 +125,9 @@ final class NavigatorTests: XCTestCase {
 
     // MARK: - present / dismiss
 
+    /*
+     present 호출 시 Route와 스타일이 구현체에 전달되는지 검증합니다.
+     */
     func test_present_forwardsRouteAndStyle() {
         sut.present(.settings, style: .fullScreenCover)
 
@@ -104,12 +136,18 @@ final class NavigatorTests: XCTestCase {
         XCTAssertEqual(spy.lastPresentedStyle, .fullScreenCover)
     }
 
+    /*
+     기본 스타일로 present 시 sheet 스타일이 구현체에 전달되는지 검증합니다.
+     */
     func test_present_defaultStyle_forwardsSheetStyle() {
         sut.present(.home, style: .sheet)
 
         XCTAssertEqual(spy.lastPresentedStyle, .sheet)
     }
 
+    /*
+     dismiss 호출이 구현체에 전달되는지 검증합니다.
+     */
     func test_dismiss_forwardsCommandToImplementation() {
         sut.dismiss()
 
@@ -118,6 +156,12 @@ final class NavigatorTests: XCTestCase {
 
     // MARK: - 메모리 안전성
 
+    /*
+     구현체 해제 후 모든 화면 이동 명령을 호출해도 크래시가 발생하지 않는지 검증합니다.
+
+     [weak navigator] 캡처를 통해 구현체 해제 후 클로저가 아무 동작도 하지 않으면서
+     앱이 안전하게 유지되어야 합니다.
+     */
     func test_weakCapture_afterImplementationReleased_doesNotCrash() {
         var localSpy: NavigatorSpy? = NavigatorSpy()
         let localSut = Navigator(localSpy!)
@@ -135,6 +179,9 @@ final class NavigatorTests: XCTestCase {
         XCTAssertTrue(true)
     }
 
+    /*
+     구현체가 해제된 Navigator가 다른 Navigator 인스턴스의 동작에 영향을 주지 않는지 검증합니다.
+     */
     func test_weakCapture_afterImplementationReleased_doesNotAffectOtherInstances() {
         var releasableSpy: NavigatorSpy? = NavigatorSpy()
         let releasableNavigator = Navigator(releasableSpy!)
@@ -154,6 +201,12 @@ final class NavigatorTests: XCTestCase {
 
 // MARK: - NavigatorSpy
 
+/*
+ Navigator<Route> 테스트에서 구현체 역할을 하는 Spy입니다.
+
+ 각 화면 이동 명령의 호출 횟수와 전달된 인자를 기록하여
+ Navigator가 올바르게 명령을 위임하는지 검증합니다.
+ */
 @MainActor
 private final class NavigatorSpy: NavigatorProtocol {
 
