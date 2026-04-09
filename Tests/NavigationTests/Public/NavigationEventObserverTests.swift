@@ -1,5 +1,5 @@
 //
-//  NavigationMiddlewareTests.swift
+//  NavigationEventObserverTests.swift
 //  NavigationTests
 //
 //  Created by jch on 2/11/26.
@@ -44,7 +44,7 @@ private final class PartialObserverSpy: NavigationEventObserver {
 // MARK: - Tests
 
 @MainActor
-final class NavigationMiddlewareTests: XCTestCase {
+final class NavigationEventObserverTests: XCTestCase {
 
     private var sut: FullObserverSpy!
 

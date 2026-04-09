@@ -14,28 +14,29 @@ private enum TestRoute: Hashable {
     case settings
 }
 
+@available(iOS, deprecated: 16.0)
 @MainActor
 final class LegacyNavigatorTests: XCTestCase {
 
     // MARK: - 헬퍼
 
     private func makeSUT(
-        push:      @escaping (TestRoute) -> Void          = { _ in },
-        pop:       @escaping () -> Void                   = {},
-        popToRoot: @escaping () -> Void                   = {},
-        replace:   @escaping ([TestRoute]) -> Void        = { _ in },
-        popTo:     @escaping (TestRoute) -> Void          = { _ in },
-        present:   @escaping (TestRoute, PresentationStyle) -> Void = { _, _ in },
-        dismiss:   @escaping () -> Void                   = {}
+        push: @escaping (TestRoute) -> Void = { _ in },
+        pop: @escaping () -> Void = {},
+        popToRoot: @escaping () -> Void = {},
+        replace: @escaping ([TestRoute]) -> Void = { _ in },
+        popTo: @escaping (TestRoute) -> Void = { _ in },
+        present: @escaping (TestRoute, PresentationStyle) -> Void = { _, _ in },
+        dismiss: @escaping () -> Void = {}
     ) -> LegacyNavigator<TestRoute> {
         LegacyNavigator(
-            push:      push,
-            pop:       pop,
+            push: push,
+            pop: pop,
             popToRoot: popToRoot,
-            replace:   replace,
-            popTo:     popTo,
-            present:   present,
-            dismiss:   dismiss
+            replace: replace,
+            popTo: popTo,
+            present: present,
+            dismiss: dismiss
         )
     }
 
@@ -133,13 +134,13 @@ final class LegacyNavigatorTests: XCTestCase {
         var dismissCount   = 0
 
         let sut = makeSUT(
-            push:      { _ in pushCount += 1 },
-            pop:       { popCount += 1 },
+            push: { _ in pushCount += 1 },
+            pop: { popCount += 1 },
             popToRoot: { popToRootCount += 1 },
-            replace:   { _ in replaceCount += 1 },
-            popTo:     { _ in popToCount += 1 },
-            present:   { _, _ in presentCount += 1 },
-            dismiss:   { dismissCount += 1 }
+            replace: { _ in replaceCount += 1 },
+            popTo: { _ in popToCount += 1 },
+            present: { _, _ in presentCount += 1 },
+            dismiss: { dismissCount += 1 }
         )
 
         sut.push(.home)
