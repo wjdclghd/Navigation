@@ -1,7 +1,7 @@
 // swift-tools-version: 6.0
 
 //
-//  Project.swift
+//  Package.swift
 //  Navigation
 //
 //  Created by jch on 2/11/26.

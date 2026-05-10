@@ -5,28 +5,9 @@
 //  Created by jch on 2/11/26.
 //
 
-/*
- NavigatorProtocol의 타입 소거 래퍼입니다.
-
- Feature 모듈의 ViewModel은 Navigator<Route>만 주입받으며,
- StackNavigator, LegacyNavigator 등 구체 구현체를 직접 알지 않습니다.
- App 타겟의 Coordinator가 구현체를 생성하고 Navigator로 감싸 주입합니다.
-
- 담당 역할
- - NavigatorProtocol 구현체를 클로저로 캡처하여 타입 정보 은닉
- - NavigationEventObserverProtocol 옵저버 등록 및 이벤트 전달
- - 구현체 해제 후에도 옵저버에게 이벤트를 정상적으로 전달
-
- 메모리 안전성
- - 구현체는 [weak navigator]로 약하게 캡처합니다.
- - 구현체가 해제된 이후에는 화면 이동 클로저가 아무 동작도 하지 않습니다.
- - 옵저버는 strong 참조로 관리되므로, 순환 참조가 우려될 경우
-   호출부에서 removeObserver(_:)를 통해 직접 해제해야 합니다.
-
- Swift 6 동시성
- - @MainActor: 모든 화면 이동과 이벤트 전달은 메인 스레드에서 실행됩니다.
- - @unchecked Sendable: @MainActor 격리를 직접 보장하므로 컴파일러 검사를 우회합니다.
- */
+/// `NavigatorProtocol`의 타입 소거 래퍼입니다.
+///
+/// Feature 모듈은 구체 구현체 대신 이 타입을 주입받아 화면 이동을 요청합니다.
 @MainActor
 public final class Navigator<Route: Hashable>: NavigatorProtocol, @unchecked Sendable {
 
@@ -38,22 +19,13 @@ public final class Navigator<Route: Hashable>: NavigatorProtocol, @unchecked Sen
     private let _present:   (Route, PresentationStyle) -> Void
     private let _dismiss:   () -> Void
 
-    /*
-     등록된 옵저버 목록입니다.
-
-     동일 인스턴스의 중복 등록은 addObserver(_:) 시점에 차단되며,
-     strong 참조로 유지됩니다.
-     */
     private var observers: [any NavigationEventObserverProtocol] = []
 
-    /*
-     NavigatorProtocol을 채택한 구현체를 받아 Navigator를 생성합니다.
-
-     구현체는 약하게 캡처되므로, 구현체의 생명주기는 호출부가 관리해야 합니다.
-
-     Parameters:
-     - navigator: 화면 이동을 처리할 NavigatorProtocol 구현체
-     */
+    /// `NavigatorProtocol`을 채택한 구현체를 받아 Navigator를 생성합니다.
+    ///
+    /// 구현체는 약하게 캡처되므로 구현체의 생명주기는 호출부가 관리합니다.
+    ///
+    /// - Parameter navigator: 화면 이동을 처리할 구현체입니다.
     public init<N: NavigatorProtocol>(_ navigator: N) where N.Route == Route {
         self._push      = { [weak navigator] route in navigator?.push(route) }
         self._pop       = { [weak navigator] in navigator?.pop() }
@@ -64,12 +36,9 @@ public final class Navigator<Route: Hashable>: NavigatorProtocol, @unchecked Sen
         self._dismiss   = { [weak navigator] in navigator?.dismiss() }
     }
 
-    /*
-     클로저를 직접 주입하여 Navigator를 생성하는 내부 초기화입니다.
-
-     테스트 목적으로 클로저를 직접 구성할 때 사용합니다.
-     모듈 외부에서는 NavigatorProtocol 채택 구현체를 통한 초기화를 사용합니다.
-     */
+    /// 클로저를 직접 주입하여 Navigator를 생성합니다.
+    ///
+    /// 테스트에서 화면 이동 동작을 직접 구성할 때 사용합니다.
     internal init(
         push:      @escaping (Route) -> Void,
         pop:       @escaping () -> Void,
@@ -88,27 +57,21 @@ public final class Navigator<Route: Hashable>: NavigatorProtocol, @unchecked Sen
         self._dismiss   = dismiss
     }
 
-    // MARK: - NavigationEventObserverProtocol 등록
+    // MARK: - Observer
 
-    /*
-     옵저버를 등록합니다.
-
-     동일 인스턴스를 중복으로 등록하면 첫 번째 등록만 유지됩니다.
-
-     Parameters:
-     - observer: 이벤트를 수신할 NavigationEventObserverProtocol 구현체
-     */
+    /// 옵저버를 등록합니다.
+    ///
+    /// 동일 인스턴스를 중복으로 등록하면 첫 번째 등록만 유지됩니다.
+    ///
+    /// - Parameter observer: 이벤트를 수신할 옵저버입니다.
     public func addObserver(_ observer: any NavigationEventObserverProtocol) {
         guard !observers.contains(where: { ($0 as AnyObject) === (observer as AnyObject) }) else { return }
         observers.append(observer)
     }
 
-    /*
-     등록된 옵저버를 제거합니다.
-
-     Parameters:
-     - observer: 제거할 NavigationEventObserverProtocol 구현체
-     */
+    /// 등록된 옵저버를 제거합니다.
+    ///
+    /// - Parameter observer: 제거할 옵저버입니다.
     public func removeObserver(_ observer: any NavigationEventObserverProtocol) {
         observers.removeAll { ($0 as AnyObject) === (observer as AnyObject) }
     }
