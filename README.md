@@ -19,8 +19,8 @@ App 타겟의 Coordinator가 구현체를 생성하여 Navigator / TabNavigator 
 
 **모듈 구조**
 - Interface
-  - Models
   - Protocols
+  - PresentationStyle.swift
 - Navigators
   - Stack
   - Tab
@@ -33,8 +33,7 @@ Navigation/
 ├─ Sources/
 │  └─ Navigation/
 │     ├─ Interface/
-│     │  ├─ Models/
-│     │  │  └─ PresentationStyle.swift
+│     │  ├─ PresentationStyle.swift
 │     │  └─ Protocols/
 │     │     ├─ NavigatorProtocol.swift
 │     │     ├─ TabNavigatorProtocol.swift
@@ -169,6 +168,8 @@ let vm = DetailViewModel(navigator: navigator)
 제공 기능:
 - `select(_:)`
 - `selectedTab`
+- `addObserver(_:)`
+- `removeObserver(_:)`
 
 메모리 안전성:
 - 구현체 해제 후에도 `_lastKnownTab` 폴백으로 `selectedTab`이 안전하게 반환됩니다.
@@ -177,6 +178,7 @@ let vm = DetailViewModel(navigator: navigator)
 예시:
 ```swift
 let tabNavigator = TabNavigator(appTabBar)
+tabNavigator.addObserver(analyticsObserver)
 tabNavigator.select(.search)
 ```
 
@@ -358,7 +360,7 @@ Navigation → (Feature, App에 의존 없음)
 **권장 확장 방식**
 
 1. `Interface/Protocols`에 새 계약 추가
-2. `Interface/Models`에 새 모델 추가
+2. `Interface`에 새 공개 타입 추가
 3. `Navigators` 하위에 새 구현체 추가
 4. 새 구현체 전용 테스트 추가
 
